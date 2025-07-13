@@ -7,7 +7,7 @@ from dataclasses import dataclass, asdict
 from typing import Optional, Dict, Any
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class JobPosting:
     """Immutable data holder for a single job posting."""
 
@@ -26,4 +26,6 @@ class JobPosting:
     def __str__(self) -> str:  # noqa: DunderStr
         """Human-readable string representation (single line)."""
         posted = self.posted_at.isoformat() if self.posted_at else "N/A"
-        return f"{self.title} @ {self.company} ({self.location}) | Posted: {posted} | {self.url}"
+        return (
+            f"{self.title} @ {self.company} ({self.location}) | Posted: {posted} | {self.url}"
+        )
