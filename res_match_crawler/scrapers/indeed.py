@@ -10,13 +10,15 @@ from bs4 import BeautifulSoup
 
 from res_match_crawler.http_helper import get_html
 from res_match_crawler.models import JobPosting
+from .base import JobBoardScraper
 
 logger = logging.getLogger(__name__)
 
 
-class IndeedScraper:
+class IndeedScraper(JobBoardScraper):
     """Fetch and parse job postings from Indeed."""
 
+    name: str = "Indeed"
     BASE_URL: str = "https://www.indeed.com"
     SEARCH_PATH: str = "/jobs"
 
