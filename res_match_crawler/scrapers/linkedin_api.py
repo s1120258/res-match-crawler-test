@@ -30,10 +30,12 @@ class LinkedInAPIScraper(JobBoardScraper):
                 "LinkedInAPIScraper requires LINKEDIN_API_KEY environment variable or api_key arg"
             )
         self._session = requests.Session()
-        self._session.headers.update({
-            "x-rapidapi-key": self.api_key,
-            "x-rapidapi-host": "linkedin-jobs-search.p.rapidapi.com"
-        })
+        self._session.headers.update(
+            {
+                "x-rapidapi-key": self.api_key,
+                "x-rapidapi-host": "linkedin-jobs-search.p.rapidapi.com",
+            }
+        )
 
     def search(
         self,
@@ -54,7 +56,10 @@ class LinkedInAPIScraper(JobBoardScraper):
             response.raise_for_status()
             data = response.json()
 
-            logger.debug("API response keys: %s", list(data.keys()) if isinstance(data, dict) else type(data))
+            logger.debug(
+                "API response keys: %s",
+                list(data.keys()) if isinstance(data, dict) else type(data),
+            )
 
             # RapidAPI LinkedIn Jobs typically returns data in 'data' or 'jobs' field
             jobs_data = data.get("data", data.get("jobs", []))
@@ -69,8 +74,12 @@ class LinkedInAPIScraper(JobBoardScraper):
                 # Common field mappings for LinkedIn Jobs API
                 title = item.get("title") or item.get("job_title") or ""
                 company = item.get("company") or item.get("company_name") or ""
-                location_text = item.get("location") or item.get("job_location") or location
-                description = item.get("description") or item.get("job_description") or ""
+                location_text = (
+                    item.get("location") or item.get("job_location") or location
+                )
+                description = (
+                    item.get("description") or item.get("job_description") or ""
+                )
                 url = item.get("url") or item.get("job_url") or item.get("link") or ""
 
                 postings.append(
