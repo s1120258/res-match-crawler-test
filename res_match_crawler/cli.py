@@ -65,7 +65,9 @@ def main() -> None:  # noqa: D401
     _configure_logging(args.verbose)
 
     scraper = IndeedScraper()
-    jobs: List[JobPosting] = scraper.search(args.keyword, args.location, limit=args.limit)
+    jobs: List[JobPosting] = scraper.search(
+        args.keyword, args.location, limit=args.limit
+    )
 
     if args.json:
         print(json.dumps([job.to_dict() for job in jobs], ensure_ascii=False, indent=2))

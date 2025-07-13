@@ -73,9 +73,7 @@ class IndeedScraper(JobBoardScraper):
 
         detail_url = _urlparse.urljoin(self.BASE_URL, href)
 
-        title = (
-            card.select_one("h2.jobTitle span") or card.select_one("h2.jobTitle")
-        )
+        title = card.select_one("h2.jobTitle span") or card.select_one("h2.jobTitle")
         company = card.select_one("span.companyName")
         loc_elem = card.select_one("div.companyLocation")
 
