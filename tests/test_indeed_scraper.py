@@ -5,9 +5,8 @@ Network calls are stubbed via monkeypatch so tests run offline.
 
 from __future__ import annotations
 
-import re
-
 import pytest
+from unittest.mock import Mock
 
 from res_match_crawler import http_helper
 from res_match_crawler.scrapers import IndeedScraper
@@ -36,16 +35,24 @@ DETAIL_HTML = """
 """
 
 
-def fake_get_html(url: str, *args, **kwargs):  # noqa: D401
-    """Return canned HTML depending on *url*."""
-    if "/jobs" in url:
-        return SEARCH_HTML
-    return DETAIL_HTML
-
-
 def test_search_parses_results(monkeypatch: pytest.MonkeyPatch) -> None:
     """scraper.search should parse two job postings correctly."""
-    monkeypatch.setattr(http_helper, "get_html", fake_get_html)
+
+    def mock_session_get(url, **kwargs):
+        """Mock requests.Session.get method."""
+        response = Mock()
+        response.status_code = 200
+        response.raise_for_status.return_value = None
+
+        if "/jobs" in url:
+            response.text = SEARCH_HTML
+        else:
+            response.text = DETAIL_HTML
+
+        return response
+
+    # Mock the session's get method directly
+    monkeypatch.setattr(http_helper._SESSION, "get", mock_session_get)
 
     scraper = IndeedScraper()
     jobs = scraper.search("python", limit=2)
@@ -56,4 +63,5 @@ def test_search_parses_results(monkeypatch: pytest.MonkeyPatch) -> None:
     assert first.title == "Python Developer"
     assert first.company == "Acme Corp"
     assert first.location == "Remote"
-    assert re.search("Python position", first.description)
+    assert "Python position" in first.description
+    assert first.url == "https://www.indeed.com/rc/clk?jk=123"
