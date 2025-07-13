@@ -26,6 +26,4 @@ class JobPosting:
     def __str__(self) -> str:  # noqa: DunderStr
         """Human-readable string representation (single line)."""
         posted = self.posted_at.isoformat() if self.posted_at else "N/A"
-        return (
-            f"{self.title} @ {self.company} ({self.location}) | Posted: {posted} | {self.url}"
-        )
+        return f"{self.title} @ {self.company} ({self.location}) | Posted: {posted} | {self.url}"

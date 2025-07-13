@@ -4,7 +4,8 @@ import logging
 from res_match_crawler.scrapers import IndeedScraper
 
 # Enable detailed logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
 
 def main():
     scraper = IndeedScraper()
@@ -28,6 +29,7 @@ def main():
         print("1. Adding delays between requests")
         print("2. Using different User-Agent strings")
         print("3. Using proxy servers")
+
 
 if __name__ == "__main__":
     main()
