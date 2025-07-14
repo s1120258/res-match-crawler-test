@@ -1,6 +1,6 @@
 # res-match-crawler-test
 
-Experimental module to fetch and parse job postings from job boards like Indeed. Used to test and validate data extraction and job-to-resume matching logic before integrating into the main ResMatch API.
+Experimental module to fetch and parse remote job postings. At the moment the project supports only the RemoteOK public API. The code is used to validate data extraction and job-to-resume matching logic before integrating into the main ResMatch API.
 
 ## Installation
 
@@ -10,34 +10,28 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## CLI Usage
+## Example Usage (script)
 
-Search Indeed for jobs:
+Run the bundled sample script which fetches jobs from RemoteOK and prints the first few lines of the full description:
 
 ```bash
-python -m res_match_crawler.cli "python developer" -l "New York, NY" -n 10 --json -vv
+python main.py
 ```
 
-Options:
-
-- `keyword` (positional): search term
-- `-l, --location`: location filter (optional)
-- `-n, --limit`: number of results (default 20)
-- `--json`: output JSON instead of plain text
-- `-v / -vv`: increase verbosity
+The script queries RemoteOK for the keyword `python` and prints 3 matching jobs with full descriptions.
 
 ## Library Usage
 
 ```python
-from res_match_crawler.scrapers import IndeedScraper
+from res_match_crawler.scrapers import RemoteOKScraper
 
-scraper = IndeedScraper()
-jobs = scraper.search("data scientist", "Remote", limit=5)
+scraper = RemoteOKScraper()
+jobs = scraper.search("python", limit=5)
 for job in jobs:
     print(job.title, job.company)
 ```
 
-The `jobs` variable is a list of `JobPosting` objects; you can call `to_dict()` on each to get a JSON-serializable dictionary.
+The `jobs` variable is a list of `JobPosting` objects; you can call `to_dict()` on each to get a JSON-serialisable dictionary.
 
 ## Running Tests
 
@@ -47,8 +41,9 @@ pytest -q
 
 The unit tests stub network calls, allowing them to run quickly and offline.
 
-## Future Work
+## Roadmap
 
-- Implement a common interface for multiple job board scrapers.
+- Add CLI support for selecting different scrapers (`remoteok`, `indeed`, etc.).
+- Re-enable Indeed and LinkedIn scrapers once reliable API access is in place.
 - Integrate resume-to-job matching score computation logic.
 - Add a Dockerfile and CI pipeline.
