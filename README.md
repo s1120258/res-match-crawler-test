@@ -37,7 +37,7 @@ for job in jobs:
     print(job.title, job.company)
 ```
 
-`jobs` は `JobPosting` オブジェクトのリストで、`to_dict()` で辞書化できます。
+The `jobs` variable is a list of `JobPosting` objects; you can call `to_dict()` on each to get a JSON-serializable dictionary.
 
 ## Running Tests
 
@@ -45,10 +45,10 @@ for job in jobs:
 pytest -q
 ```
 
-ユニットテストではネットワークをスタブ化してあるため、オフラインで高速に実行可能です。
+The unit tests stub network calls, allowing them to run quickly and offline.
 
 ## Future Work
 
-- 複数ジョブボード対応の共通インターフェース実装
-- レジュメとのマッチングスコア計算ロジックとの統合
-- Dockerfile / CI パイプライン追加
+- Implement a common interface for multiple job board scrapers.
+- Integrate resume-to-job matching score computation logic.
+- Add a Dockerfile and CI pipeline.
