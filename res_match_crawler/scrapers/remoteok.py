@@ -12,6 +12,7 @@ import time
 from typing import List
 
 import requests
+from bs4 import BeautifulSoup
 
 from res_match_crawler.models import JobPosting
 from .base import JobBoardScraper
@@ -34,17 +35,72 @@ class RemoteOKScraper(JobBoardScraper):
             }
         )
 
+    def _fetch_full_description(self, job_url: str) -> str:
+        """Fetch the full job description from the job detail page."""
+        try:
+            time.sleep(1)  # Be respectful to the server
+            response = self._session.get(job_url, timeout=30)
+            response.raise_for_status()
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Look for the job description in various possible selectors
+            desc_selectors = [
+                '.markdown',
+                '.job-description',
+                '.description',
+                '[data-description]',
+                '.content'
+            ]
+
+            for selector in desc_selectors:
+                desc_elem = soup.select_one(selector)
+                if desc_elem:
+                    # Clean up the text
+                    description = desc_elem.get_text(separator='\n', strip=True)
+                    if len(description) > 100:  # Make sure it's substantial
+                        return description
+
+            # Fallback: try to find any substantial text content
+            main_content = soup.select_one('main') or soup.select_one('body')
+            if main_content:
+                # Remove navigation, header, footer elements
+                for elem in main_content.select('nav, header, footer, .nav, .header, .footer'):
+                    elem.decompose()
+
+                text = main_content.get_text(separator='\n', strip=True)
+                lines = [line.strip() for line in text.split('\n') if line.strip()]
+
+                # Find substantial content (likely the job description)
+                substantial_lines = [line for line in lines if len(line) > 50]
+                if substantial_lines:
+                    return '\n'.join(substantial_lines[:20])  # Limit to first 20 substantial lines
+
+            logger.warning("Could not extract full description from %s", job_url)
+            return ""
+
+        except Exception as e:
+            logger.debug("Failed to fetch full description from %s: %s", job_url, e)
+            return ""
+
     def search(
         self,
         keyword: str,
         location: str = "",
         *,
         limit: int = 20,
+        fetch_full_description: bool = True,
     ) -> List[JobPosting]:
         """Search RemoteOK for remote jobs.
 
         Note: RemoteOK API returns all jobs, so we filter by keyword locally.
         The location parameter is ignored since all jobs are remote.
+
+        Args:
+            keyword: Search keyword
+            location: Ignored (all jobs are remote)
+            limit: Maximum number of jobs to return
+            fetch_full_description: If True, fetch full descriptions from job pages
         """
         logger.info("RemoteOK API search for keyword: %s", keyword)
 
@@ -94,10 +150,18 @@ class RemoteOKScraper(JobBoardScraper):
                 if job.get("location"):
                     location_text = f"Remote ({job.get('location')})"
 
+                # Fetch full description if requested
+                full_description = description
+                if fetch_full_description and url:
+                    logger.info("Fetching full description for: %s", title)
+                    full_desc = self._fetch_full_description(url)
+                    if full_desc:
+                        full_description = full_desc
+
                 postings.append(
                     JobPosting(
                         title=title,
-                        description=description,
+                        description=full_description,
                         location=location_text,
                         company=company,
                         url=url,
